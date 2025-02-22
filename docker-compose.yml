@@ -4,14 +4,14 @@ services:
     container_name: splunk-threatlab
     environment:
       - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_PASSWORD=PasswdTest!
+      - SPLUNK_PASSWORD=${PASSWD_SPLUNK}
     ports:
       - "8000:8000"
     volumes:
       - ./volumes/splunk-data:/opt/splunk/var
 
   caldera:
-    image: caldera:latest  # Usa a imagem já construída
+    image: caldera:latest
     container_name: caldera-threatlab
     ports:
       - "8888:8888"
@@ -23,9 +23,9 @@ services:
       - "8022:8022"
       - "2222:2222"
     volumes:
-      - ./volumes/caldera-logs:/usr/src/app/logs  # Apenas logs persistentes
-    command: --insecure --log DEBUG  # Mantém o --log DEBUG e adiciona --insecure
+      - ./volumes/caldera-logs:/usr/src/app/logs
+    command: --insecure --log DEBUG
 
 volumes:
   splunk-data:
-  caldera-data:
+  caldera-logs:
