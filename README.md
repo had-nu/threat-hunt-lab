@@ -5,8 +5,7 @@ O Threat Hunt Lab é um ambiente pré-configurado que combina o MITRE Caldera pa
 
 **Notas de atualização:**
 
-*22-fev-2024*
-Este é apenas um *Minimum Viable Product (MVP)* com uma estrutura mínima para testes. Algumas configurações adicionais (como redes personalizadas, volumes, limites de arquivos, etc.), embora úteis em um projeto maior, poderiam complicar o trabalho. Farei pequenos incrementos diários, conforme avanço com o projeto.
+*22-fev-2024 - Este é apenas um *Minimum Viable Product (MVP)* com uma estrutura mínima para testes. Algumas configurações adicionais (como redes personalizadas, volumes, limites de arquivos, etc.), embora úteis em um projeto maior, poderiam complicar o trabalho. Farei pequenos incrementos diários, conforme avanço com o projeto.*
 
 ---
 
