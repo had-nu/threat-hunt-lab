@@ -1,10 +1,13 @@
 # Threat Hunt Lab
 O Threat Hunt Lab é um ambiente pré-configurado que combina o MITRE Caldera para simulações avançadas de ataques cibernéticos com o Splunk para monitoramento, análise de logs e resposta a incidentes. Construído com Docker e Docker Compose, este projeto traz uma solução fácil de implantar para quem, como eu, quer simular um ambiente real de ataque e defesa. Também para equipas de segurança testarem táticas de Red Team e Blue Team em um único laboratório integrado.
 
+---
+
 **Notas de atualização:**
 *22-fev-2024*
 Este é apenas um *Minimum Viable Product (MVP)* com uma estrutura mínima para testes. Algumas configurações adicionais (como redes personalizadas, volumes, limites de arquivos, etc.), embora úteis em um projeto maior, poderiam complicar o trabalho. Farei pequenos incrementos diários, conforme avanço com o projeto.
 
+---
 
 ## Estrutura do Projeto
 ``` text
@@ -39,7 +42,9 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 *Nota:
 Consulte a documentação oficial do Docker para lidar com especificidades não mencionadas anteriormente.*
+
 ---
+
 ## Configuração do Laboratório
 ### Preparação das Imagens
 1. Splunk
