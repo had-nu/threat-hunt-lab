@@ -85,3 +85,65 @@ docker compose down -v  # Remove volumes
 ### Solução de Problemas
 - Portas em conflito: Se necessário, altere as portas no `docker-compose.yml`.
 - Erros de build: Verifique se o Caldera foi clonado recursivamente.
+
+---
+
+### Comandos Docker essenciais
+**Comandos Docker Compose**
+1. Iniciar os serviços em segundo plano:
+``` bash
+docker-compose up -d # cria e inicia os containers do Splunk e Caldera em modo detached.
+```
+2. Parar e remover containers (mantendo volumes de dados):
+``` bash
+docker-compose down
+```
+3. Parar e remover tudo (containers + volumes):
+``` bash
+docker-compose down -v # dados persistentes serão apagados.
+```
+4. Visualizar logs em tempo real:
+``` bash
+docker-compose logs -f # para "follow".
+```
+5. Reiniciar um serviço específico:
+``` bash
+docker-compose restart splunk
+```
+
+**Comandos Docker**
+1. Listar containers em execução:
+``` bash
+docker ps # exibe apenas containers ativos.
+```
+2. Listar todos os containers (ativos e parados):
+``` bash
+docker ps -a # mostra todos os containers, incluindo os parados.
+```
+3. Visualizar logs de um container:
+``` bash
+docker logs splunk-threatlab
+```
+4. Acessar o terminal de um container:
+``` bash
+docker exec -it splunk-threatlab /bin/bash
+```
+5. Remover uma imagem:
+``` bash
+docker rmi splunk/splunk:9.1.2 # remove a imagem do Splunk (após parar containers dependentes).
+```
+6. Limpar recursos não utilizados:
+``` bash
+docker system prune -a # remove containers, imagens e volumes não utilizados (use com cuidado).
+```
+
+**Gerenciamento de Volumes**
+1. Listar todos os volumes criados pelo Docker:
+``` bash
+docker volume ls
+```
+2. Inspecionar um volume:
+``` bash
+docker volume inspect threat-hunt-lab_splunk-data
+```
+
