@@ -34,7 +34,7 @@ Consulte a [documentação oficial do Docker](https://docs.docker.com/engine/ins
 ### Configuração do Laboratório
 1. Clone o repositório:
 ``` bash
-git clone https://github.com/seu-usuario/threat-hunt-lab.git
+git clone https://github.com/had-nu/threat-hunt-lab.git
 cd threat-hunt-lab
 ```
 2. Configure senhas no `.env`:
