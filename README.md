@@ -153,3 +153,9 @@ docker volume ls
 docker volume inspect threat-hunt-lab_splunk-data
 ```
 
+---
+## Licença
+Este projeto está licenciado sob a **Apache License 2.0**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
