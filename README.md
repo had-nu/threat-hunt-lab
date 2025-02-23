@@ -3,6 +3,10 @@
 
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=flat&logo=docker&logoColor=white)](https://www.docker.com) 
 [![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat&logo=splunk&logoColor=white)](https://www.splunk.com)
+[![MITRE Caldera](https://img.shields.io/badge/MITRE%20Caldera-2CA5E0?style=flat&logo=github&logoColor=white)](https://github.com/mitre/caldera)
+[![Caldera Version](https://img.shields.io/badge/Caldera-v5.0.0-blue)](https://github.com/mitre/caldera/releases/tag/v5.0.0)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Project Status](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/mitre/caldera)
 
 Este é um ambiente Docker pré-configurado para simular ataques (Caldera) e monitorar/responder com o Splunk. Ideal para testes de Red Team/Blue Team.
 
