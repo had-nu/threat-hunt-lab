@@ -85,6 +85,8 @@ docker compose down -v  # Remove volumes
 ### Solução de Problemas
 - Portas em conflito: Se necessário, altere as portas no `docker-compose.yml`.
 - Erros de build: Verifique se o Caldera foi clonado recursivamente.
+- Erros de permissão: Se está no Linux sem privilégios de super usuário, lembre-se de incluir o `sudo`.
+- Atualizar senhas: Após alterar senhas no `.env` lembre-se de reiniciar o serviço.
 
 ---
 
