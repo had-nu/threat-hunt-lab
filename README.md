@@ -23,6 +23,13 @@ threat-hunt-lab/
     ├── splunk-data/        # Dados persistentes do Splunk
     └── caldera-logs/       # Logs do Caldera
 ```
+---
+
+**Notas de atualização:**
+*22-fev-2024 - Este é apenas um *Minimum Viable Product (MVP)* com uma estrutura mínima para testes. Algumas configurações adicionais (como redes personalizadas, volumes, limites de arquivos, etc.), embora úteis em um projeto maior, poderiam complicar o trabalho. Farei pequenos incrementos diários, conforme avanço com o projeto.*
+
+---
+
 ## Começando
 ### Pré-Requisitos
 Certifique-se de ter o Docker e o Docker Compose instalados com os seguintes comandos (exemplo para Ubuntu):
