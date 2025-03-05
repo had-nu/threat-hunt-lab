@@ -65,7 +65,7 @@ O MITRE Caldera não possui uma imagem oficial no Docker Hub, portanto será nec
 1. Clone o repositório do Caldera e construa a imagem:
 ``` bash
 git clone --recursive --branch 5.0.0 https://github.com/mitre/caldera.git caldera
-docker build ./caldera docker build . --build-arg WIN_BUILD=true -t caldera:latest
+docker build ./caldera --build-arg WIN_BUILD=true -t caldera:latest
 cd ..
 ```
 - Isso usa o `Dockerfile` oficial do Caldera.
