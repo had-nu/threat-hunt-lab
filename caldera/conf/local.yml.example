@@ -1,0 +1,59 @@
+# Caldera Local Configuration Override
+# Copy this file to caldera/conf/local.yml and customize for your environment
+# This file takes precedence over default.yml
+
+# app:
+#   host: "0.0.0.0"
+#   port: 8888
+#   name: "Meu Caldera Lab"
+#   debug: false
+
+# SSL/TLS Configuration (requires cert files in conf/)
+# ssl:
+#   key: "conf/caldera.key"
+#   cert: "conf/caldera.crt"
+
+# auth:
+#   provider: "local"
+#   users:
+#     admin:
+#       password: "${CALDERA_ADMIN_PASSWORD}"
+#       roles: ["admin"]
+
+# api_keys:
+#   red: "sua-red-api-key-unica"
+#   blue: "sua-blue-api-key-unica"
+
+# plugins:
+#   - training
+#   - atomic
+#   - stockpile
+#   - sandcat
+#   - manx
+#   - response
+#   - compass
+#   - fieldmanual
+#   - builder
+#   # Adicione plugins extras aqui (ex: dnp3, iec61850, crater)
+
+# contacts:
+#   - name: "http"
+#     type: "http"
+#     port: 8888
+#     api_key: "red"
+#   - name: "websocket"
+#     type: "websocket"
+#     port: 7010
+#     api_key: "red"
+
+# sandcat:
+#   server: "http://caldera-threatlab:8888"
+#   sleep_min: 5
+#   sleep_max: 10
+#   watchdog: 30
+
+# logging:
+#   level: "INFO"
+#   file: "logs/caldera.log"
+#   max_size: "10MB"
+#   max_files: 5

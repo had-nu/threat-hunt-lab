@@ -28,3 +28,21 @@ Thumbs.db
 # Ignorar arquivos de build do Docker (se houver)
 Dockerfile-*
 docker-compose.override.yml
+
+# Ignorar arquivos de backup
+backups/
+*.tar.gz
+
+# Ignorar certificados TLS
+letsencrypt/
+*.key
+*.crt
+*.pem
+
+# Ignorar relatórios de segurança
+trivy-results.sarif
+*.sarif
+
+# Ignorar logs de runtime
+logs/
+*.log

@@ -1,168 +1,327 @@
-# Threat Hunt Lab  
-**Laboratório integrado de simulação de ameaças com Splunk e MITRE Caldera**  
+# Threat Hunt Lab
 
-[![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=flat&logo=docker&logoColor=white)](https://www.docker.com) 
+**Laboratório integrado de simulação de ameaças com Splunk e MITRE Caldera**
+
+[![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=flat&logo=docker&logoColor=white)](https://www.docker.com)
 [![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat&logo=splunk&logoColor=white)](https://www.splunk.com)
-[![MITRE Caldera](https://img.shields.io/badge/MITRE%20Caldera-2CA5E0?style=flat&logo=github&logoColor=white)](https://github.com/mitre/caldera)
-[![Caldera Version](https://img.shields.io/badge/Caldera-v5.0.0-blue)](https://github.com/mitre/caldera/releases/tag/v5.0.0)
+[![MITRE Caldera](https://img.shields.io/badge/MITRE%20Caldera-2CA5E0?style=flat&logo=github&logoColor=white)](https://github.com/apache/caldera)
+[![Caldera Version](https://img.shields.io/badge/Caldera-v5.3.0+-blue)](https://github.com/apache/caldera/releases)
+[![Splunk Version](https://img.shields.io/badge/Splunk-10.4.2-blue)](https://hub.docker.com/r/splunk/splunk/tags)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Project Status](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/mitre/caldera)
+[![Project Status](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/had-nu/threat-hunt-lab)
 
-Este é um ambiente Docker pré-configurado para simular ataques (Caldera) e monitorar/responder com o Splunk. Ideal para testes de Red Team/Blue Team.
+Este é um ambiente Docker pré-configurado para simular ataques (Caldera) e monitorar/responder com o Splunk. Ideal para testes de Red Team/Blue Team, threat hunting e detecção baseada em MITRE ATT&CK.
 
 ---
 
-## Estrutura do Projeto
+## 📁 Estrutura do Projeto
+
 ```text
 threat-hunt-lab/
-├── .env                    # Variáveis de ambiente (senhas)
+├── .env                    # Variáveis de ambiente (senhas) - NÃO commitado
+├── .env.example            # Template para .env
 ├── docker-compose.yml      # Orquestração dos serviços
 ├── caldera/
-│   └── Dockerfile          # Build personalizado do Caldera
-└── volumes/
-    ├── splunk-data/        # Dados persistentes do Splunk
-    └── caldera-logs/       # Logs do Caldera
+│   └── conf/
+│       └── default.yml     # Configuração padrão do Caldera
+└── volumes/                # Dados persistentes (gitignored)
+    ├── splunk-data/
+    ├── splunk-etc/
+    ├── caldera-logs/
+    ├── caldera-conf/
+    └── caldera-plugins/
 ```
----
-
-**Notas de atualização:**
-*22-fev-2024 - Este é apenas um *Minimum Viable Product (MVP)* com uma estrutura mínima para testes. Algumas configurações adicionais (como redes personalizadas, volumes, limites de arquivos, etc.), embora úteis em um projeto maior, poderiam complicar o trabalho. Farei pequenos incrementos diários, conforme avanço com o projeto.*
 
 ---
 
-## Começando
+## 🚀 Quick Start (Início Rápido)
+
 ### Pré-Requisitos
-Certifique-se de ter o Docker e o Docker Compose instalados com os seguintes comandos (exemplo para Ubuntu):
 
-- Docker e Docker Compose instalados.
-- Portas 8000 (Splunk) e 8888 (Caldera) liberadas.
+- **Docker Engine** 20.10+ e **Docker Compose** v2+ (plugin `docker compose`)
+- **RAM**: Mínimo 8 GB (recomendado 16 GB)
+- **CPU**: 4+ cores
+- **Portas livres**: 8000, 8088, 8089 (Splunk) • 8888 (Caldera)
 
-*Nota:
-Consulte a [documentação oficial do Docker](https://docs.docker.com/engine/install/ubuntu/) para lidar com especificidades não mencionadas anteriormente.*
+> 💡 **Ubuntu/Debian**: `sudo apt update && sudo apt install docker.io docker-compose-plugin`
 
 ---
 
-### Configuração do Laboratório
-1. Clone o repositório:
-``` bash
+### 1. Clone e Configure
+
+```bash
+# Clone o repositório
 git clone https://github.com/had-nu/threat-hunt-lab.git
 cd threat-hunt-lab
+
+# Configure variáveis de ambiente (OBRIGATÓRIO)
+cp .env.example .env
+# Edite .env e defina senhas fortes:
+# SPLUNK_PASSWORD=SuaSenhaForte123!
+# CALDERA_ADMIN_PASSWORD=OutraSenhaForte456!
 ```
-2. Configure senhas no `.env`:
-``` bash
-echo "SPLUNK_PASSWORD=SenhaForte123" > .env
+
+### 2. Suba o Laboratório
+
+```bash
+# Inicia em background (detached)
+docker compose up -d
+
+# Acompanhe logs de inicialização
+docker compose logs -f
 ```
-### Construção do ambiente
-1. Splunk
-O `docker-compose.yml` deste repositório já configura e baixa a imagem oficial do Splunk do Docker Hub automaticamente ao rodar os contêineres. Não é necessário nenhum passo manual antes disso.
-- Imagem utilizada: `splunk/splunk:9.1.2`.
 
-2. Caldera
-O MITRE Caldera não possui uma imagem oficial no Docker Hub, portanto será necessário construir a imagem localmente. Entretanto, o repositório oficial do Caldera fornece um `Dockerfile` que pode ser usado para essa construção.
+### 3. Acesse as Interfaces
 
-**Para construir o Caldera:**
+| Serviço | URL | Credenciais Padrão |
+|---------|-----|-------------------|
+| **Splunk Web** | http://localhost:8000 | `admin` / `$SPLUNK_PASSWORD` |
+| **Splunk HEC** | http://localhost:8088 | Token: `$SPLUNK_HEC_TOKEN` (se definido) |
+| **Splunk Mgmt** | https://localhost:8089 | `admin` / `$SPLUNK_PASSWORD` |
+| **Caldera** | http://localhost:8888 | `admin` / `$CALDERA_ADMIN_PASSWORD` |
 
-1. Clone o repositório do Caldera e construa a imagem:
-``` bash
-git clone --recursive --branch 5.0.0 https://github.com/mitre/caldera.git caldera
-docker build ./caldera --build-arg WIN_BUILD=true -t caldera:latest
-cd ..
-```
-- Isso usa o `Dockerfile` oficial do Caldera.
-- O argumento `--build-arg WIN_BUILD=true` é opcional (inclua apenas se precisar de suporte a builds Windows no plugin Sandcat).
-
-### Rodando os Contêineres
-Com a imagem do Caldera construída e o Splunk configurado via docker-compose.yml, inicie o laboratório:
-
-1. Suba os contêineres:
-``` bash
-docker-compose up
-```
-- **Splunk:** Disponível em http://localhost:8000 (usuário: `admin`, senha: `<DefinaUmaSenha>`).
-- **Caldera:** Disponível em http://localhost:8888 (usuário: `admin`, senha: `admin`).
-2. Verifique os logs:
-- Logs aparecem no terminal.
-- Logs persistentes ficam em `./volumes/splunk-data` e `./volumes/caldera-logs`.
+> ⏳ **Primeira inicialização**: Splunk leva ~2-3 min para aceitar licença e indexar. Caldera ~30-60s.
 
 ---
 
-3. Parando o ambiente:
-``` bash
-docker compose down  # Mantém os volumes
-docker compose down -v  # Remove volumes
-```
----
+### 4. Verifique Status
 
-### Solução de Problemas
-- Portas em conflito: Se necessário, altere as portas no `docker-compose.yml`.
-- Erros de build: Verifique se o Caldera foi clonado recursivamente.
-- Erros de permissão: Se está no Linux sem privilégios de super usuário, lembre-se de incluir o `sudo`.
-- Atualizar senhas: Após alterar senhas no `.env` lembre-se de reiniciar o serviço.
+```bash
+# Status dos containers
+docker compose ps
+
+# Health checks
+docker compose exec splunk /opt/splunk/bin/splunk status
+curl -s http://localhost:8888/api/v2/version | jq .
+```
 
 ---
 
-### Comandos Docker essenciais
-**Comandos Docker Compose**
-1. Iniciar os serviços em segundo plano:
-``` bash
-docker-compose up -d # cria e inicia os containers do Splunk e Caldera em modo detached.
-```
-2. Parar e remover containers (mantendo volumes de dados):
-``` bash
-docker-compose down
-```
-3. Parar e remover tudo (containers + volumes):
-``` bash
-docker-compose down -v # dados persistentes serão apagados.
-```
-4. Visualizar logs em tempo real:
-``` bash
-docker-compose logs -f # para "follow".
-```
-5. Reiniciar um serviço específico:
-``` bash
-docker-compose restart splunk
-```
+### 5. Pare o Ambiente
 
-**Comandos Docker**
-1. Listar containers em execução:
-``` bash
-docker ps # exibe apenas containers ativos.
-```
-2. Listar todos os containers (ativos e parados):
-``` bash
-docker ps -a # mostra todos os containers, incluindo os parados.
-```
-3. Visualizar logs de um container:
-``` bash
-docker logs splunk-threatlab
-```
-4. Acessar o terminal de um container:
-``` bash
-docker exec -it splunk-threatlab /bin/bash
-```
-5. Remover uma imagem:
-``` bash
-docker rmi splunk/splunk:9.1.2 # remove a imagem do Splunk (após parar containers dependentes).
-```
-6. Limpar recursos não utilizados:
-``` bash
-docker system prune -a # remove containers, imagens e volumes não utilizados (use com cuidado).
-```
+```bash
+# Para containers (mantém dados)
+docker compose down
 
-**Gerenciamento de Volumes**
-1. Listar todos os volumes criados pelo Docker:
-``` bash
-docker volume ls
-```
-2. Inspecionar um volume:
-``` bash
-docker volume inspect threat-hunt-lab_splunk-data
+# Para containers + REMOVE volumes (dados perdidos!)
+docker compose down -v
 ```
 
 ---
-## Licença
+
+## ⚙️ Configuração Avançada
+
+### Variáveis de Ambiente (`.env`)
+
+```bash
+# OBRIGATÓRIAS
+SPLUNK_PASSWORD=SenhaForte123!          # 8+ chars, upper, lower, number, special
+CALDERA_ADMIN_PASSWORD=SenhaForte456!   # Senha admin do Caldera
+
+# OPCIONAIS
+SPLUNK_HEC_TOKEN=meu-token-hec          # Para ingestão via HTTP Event Collector
+# SPLUNK_LICENSE_URI=https://license:8000  # Se tiver license master
+# TRAEFIK_DOMAIN=threathunt.local       # Para TLS via Traefik (ver docker-compose.yml)
+```
+
+### Portas Expostas
+
+| Porta | Serviço | Protocolo | Descrição |
+|-------|---------|-----------|-----------|
+| 8000 | Splunk Web | TCP | Interface web principal |
+| 8088 | Splunk HEC | TCP | HTTP Event Collector |
+| 8089 | Splunk Mgmt | TCP | Management API (REST) |
+| 8888 | Caldera Web/API | TCP | Interface e API REST |
+| 7010 | Caldera WS | TCP | WebSocket C2 (opcional) |
+| 7011 | Caldera TCP | TCP | Raw TCP C2 (opcional) |
+| 7012 | Caldera UDP | UDP | UDP C2 (opcional) |
+
+> 🔒 **Segurança**: Por padrão, apenas 8000, 8088, 8089 (Splunk) e 8888 (Caldera) são expostos no host. Portas C2 (7010-7012) ficam apenas na rede interna `threatlab-network`. Para expor, edite `docker-compose.yml`.
+
+### Rede Isolada
+
+Todos os containers rodam na rede `threatlab-network` (subnet `172.28.0.0/16`), isolados do host e outros containers.
+
+---
+
+## 🔧 Operações Comuns
+
+### Logs
+
+```bash
+# Todos os logs (follow)
+docker compose logs -f
+
+# Apenas Splunk
+docker compose logs -f splunk
+
+# Apenas Caldera
+docker compose logs -f caldera
+
+# Últimas 100 linhas
+docker compose logs --tail=100 splunk
+```
+
+### Acesso ao Shell
+
+```bash
+# Splunk
+docker compose exec splunk /bin/bash
+
+# Caldera
+docker compose exec caldera /bin/bash
+
+# Splunk CLI
+docker compose exec splunk /opt/splunk/bin/splunk search "index=_internal | head 5"
+```
+
+### Backup e Restore
+
+```bash
+# Backup volumes (para diretório local)
+mkdir -p backups/$(date +%F)
+docker run --rm -v threatlab-splunk-data:/data -v $(pwd)/backups/$(date +%F):/backup alpine tar czf /backup/splunk-data.tar.gz -C /data .
+docker run --rm -v threatlab-caldera-conf:/data -v $(pwd)/backups/$(date +%F):/backup alpine tar czf /backup/caldera-conf.tar.gz -C /data .
+
+# Restore (exemplo Splunk)
+docker run --rm -v threatlab-splunk-data:/data -v $(pwd)/backups/2026-01-15:/backup alpine tar xzf /backup/splunk-data.tar.gz -C /data
+```
+
+### Atualização de Imagens
+
+```bash
+# Pull latest images
+docker compose pull
+
+# Recreate containers com novas imagens
+docker compose up -d --force-recreate
+
+# Limpeza de imagens antigas
+docker image prune -f
+```
+
+---
+
+## 🛡️ Hardening de Segurança (Produção)
+
+### 1. TLS/SSL com Traefik (Recomendado)
+
+Descomente a seção `traefik` no `docker-compose.yml` e configure:
+
+```bash
+# No .env
+TRAEFIK_DOMAIN=threathunt.seudominio.com
+
+# Certifique-se que DNS A aponta para este host
+# Traefik obtém certs Let's Encrypt automaticamente
+```
+
+### 2. Firewall (UFW exemplo)
+
+```bash
+# Apenas portas necessárias
+sudo ufw allow 8000/tcp   # Splunk Web
+sudo ufw allow 8088/tcp   # Splunk HEC
+sudo ufw allow 8888/tcp   # Caldera
+sudo ufw enable
+```
+
+### 3. Senhas e Secrets
+
+- **NUNCA** use senhas padrão em produção
+- Use secrets do Docker Swarm/K8s ou vault externo
+- Rode `docker compose exec splunk /opt/splunk/bin/splunk edit user admin -password 'NovaSenhaForte!' -auth admin:SenhaAtual`
+
+### 4. Splunk HEC Token
+
+Gere token seguro:
+```bash
+# No Splunk Web: Settings > Data Inputs > HTTP Event Collector > New Token
+# Ou via CLI:
+docker compose exec splunk /opt/splunk/bin/splunk http-event-collector create threatlab -uri https://localhost:8089 -auth admin:$SPLUNK_PASSWORD
+```
+
+### 5. Caldera API Keys
+
+Regere API keys no primeiro login:
+1. Acesse http://localhost:8888
+2. Login com `admin` / `$CALDERA_ADMIN_PASSWORD`
+3. Vá em **Settings > API Keys** > **Generate New Key**
+4. Atualize `caldera/conf/default.yml` ou crie `caldera/conf/local.yml`
+
+---
+
+## 📚 Primeiros Passos no Laboratório
+
+### Splunk: Ingestão de Logs do Caldera
+
+1. No Splunk Web: **Settings > Data Inputs > HTTP Event Collector > New Token**
+   - Name: `caldera`
+   - Enable SSL: ✅ (se usar Traefik)
+   - Index: `main` (ou crie `threathunt`)
+2. Copie o **Token** gerado
+3. No Caldera: **Settings > Reporting > Splunk** > configure host/token
+
+### Caldera: Primeira Operação
+
+1. Acesse http://localhost:8888
+2. Login: `admin` / sua senha
+3. Vá em **Plugins > Training** > complete o curso "Adversary Emulation"
+4. Crie um **Adversary Profile** baseado em ATT&CK
+5. Deploy um **Agent** (Sandcat/Manx) em VM alvo
+6. Execute uma **Operation** e observe logs no Splunk
+
+---
+
+## 🐛 Troubleshooting
+
+| Problema | Solução |
+|----------|---------|
+| **Porta 8000 em uso** | `sudo lsof -i :8000` → mude no `docker-compose.yml` |
+| **Splunk não inicia** | `docker compose logs splunk` → verifique licença/senha |
+| **Caldera 500 error** | `docker compose logs caldera` → verifique `conf/default.yml` |
+| **Permissão negada volumes** | `sudo chown -R 1000:1000 volumes/` (UID Splunk/Caldera) |
+| **Sem memória** | Aumente `deploy.resources.limits.memory` no compose |
+| **Caldera não vê plugins** | `docker compose exec caldera ls /usr/src/app/plugins` → reinicie |
+
+---
+
+## 📦 Versões Utilizadas
+
+| Componente | Versão | Fonte |
+|------------|--------|-------|
+| Splunk Enterprise | 10.4.2 | `splunk/splunk:10.4.2` (Docker Hub) |
+| MITRE Caldera | 5.3.0+ (latest) | `ghcr.io/mitre/caldera:latest` (GHCR) |
+| Traefik (opcional) | v3.0 | `traefik:v3.0` (Docker Hub) |
+
+> 📌 **Nota**: Splunk 10.x requer `SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com`. Para LTS, use `splunk/splunk:9.4.3`.
+
+---
+
+## 🤝 Contribuindo
+
+1. Fork o repositório
+2. Crie branch: `git checkout -b feature/minha-feature`
+3. Commit: `git commit -m 'feat: minha feature'`
+4. Push: `git push origin feature/minha-feature`
+5. Abra Pull Request
+
+---
+
+## 📄 Licença
+
 Este projeto está licenciado sob a **Apache License 2.0**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+---
 
+## 🔗 Referências
+
+- [Splunk Docker Docs](https://github.com/splunk/docker-splunk)
+- [Caldera Documentation](https://caldera.readthedocs.io/)
+- [MITRE ATT&CK Framework](https://attack.mitre.org/)
+- [Caldera GitHub (Apache)](https://github.com/apache/caldera)
+- [Splunk General Terms](https://www.splunk.com/en_us/legal/splunk-general-terms.html)
+
+---
+
+> **Última atualização**: Agosto 2026 — Versões: Splunk 10.4.2, Caldera 5.3.0+

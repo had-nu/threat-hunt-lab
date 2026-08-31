@@ -1,0 +1,54 @@
+# Dependabot configuration for automatic dependency updates
+version: 2
+updates:
+  # Docker Compose base images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "America/Sao_Paulo"
+    labels:
+      - "docker"
+      - "dependencies"
+    commit-message:
+      prefix: "chore(docker)"
+    groups:
+      splunk:
+        patterns:
+          - "splunk/splunk*"
+      caldera:
+        patterns:
+          - "ghcr.io/mitre/caldera*"
+      traefik:
+        patterns:
+          - "traefik*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:30"
+      timezone: "America/Sao_Paulo"
+    labels:
+      - "github-actions"
+      - "dependencies"
+    commit-message:
+      prefix: "chore(actions)"
+
+  # Dockerfile (if any)
+  - package-ecosystem: "docker"
+    directory: "/caldera"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/Sao_Paulo"
+    labels:
+      - "docker"
+      - "caldera"
+    commit-message:
+      prefix: "chore(caldera)"

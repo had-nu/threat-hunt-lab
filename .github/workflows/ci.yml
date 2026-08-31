@@ -1,0 +1,190 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday 02:00 UTC
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  validate-compose:
+    name: Validate Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml syntax
+        run: |
+          docker compose config --quiet
+          echo "✓ docker-compose.yml is valid"
+
+      - name: Check required env vars in .env.example
+        run: |
+          required_vars=("SPLUNK_PASSWORD" "CALDERA_ADMIN_PASSWORD")
+          for var in "${required_vars[@]}"; do
+            if ! grep -q "^${var}=" .env.example; then
+              echo "✗ Missing required variable: $var"
+              exit 1
+            fi
+          done
+          echo "✓ All required variables present in .env.example"
+
+  security-scan:
+    name: Security Scan (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: 'docker-compose'
+
+  check-versions:
+    name: Check Image Versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Splunk version from docker-compose.yml
+        id: splunk
+        run: |
+          version=$(grep -E 'image: splunk/splunk:' docker-compose.yml | head -1 | sed 's/.*://' | tr -d '"')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Splunk version in compose: $version"
+
+      - name: Check Splunk latest on Docker Hub
+        id: splunk-latest
+        run: |
+          # Get latest stable tag (not latest, not sig, not rhel)
+          latest=$(curl -s "https://hub.docker.com/v2/repositories/splunk/splunk/tags/?page_size=100" | \
+            jq -r '.results[].name' | \
+            grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' | \
+            sort -V | tail -1)
+          echo "latest=$latest" >> $GITHUB_OUTPUT
+          echo "Latest Splunk on Docker Hub: $latest"
+
+      - name: Compare Splunk versions
+        if: steps.splunk.outputs.version != steps.splunk-latest.outputs.latest
+        run: |
+          echo "⚠️ Splunk version outdated!"
+          echo "Current: ${{ steps.splunk.outputs.version }}"
+          echo "Latest:  ${{ steps.splunk-latest.outputs.latest }}"
+          echo "Consider updating docker-compose.yml"
+          # Don't fail, just warn
+
+      - name: Extract Caldera version from docker-compose.yml
+        id: caldera
+        run: |
+          version=$(grep -E 'image: ghcr.io/mitre/caldera:' docker-compose.yml | head -1 | sed 's/.*://' | tr -d '"')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Caldera version in compose: $version"
+
+      - name: Check Caldera latest release
+        id: caldera-latest
+        run: |
+          latest=$(curl -s https://api.github.com/repos/apache/caldera/releases/latest | jq -r '.tag_name')
+          echo "latest=$latest" >> $GITHUB_OUTPUT
+          echo "Latest Caldera release: $latest"
+
+      - name: Compare Caldera versions
+        if: steps.caldera.outputs.version != steps.caldera-latest.outputs.latest
+        run: |
+          echo "⚠️ Caldera version may be outdated!"
+          echo "Current: ${{ steps.caldera.outputs.version }}"
+          echo "Latest:  ${{ steps.caldera-latest.outputs.latest }}"
+          echo "Consider updating docker-compose.yml"
+
+  test-compose-up:
+    name: Test Docker Compose Up (Smoke Test)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test .env
+        run: |
+          cat > .env <<'EOF'
+          SPLUNK_PASSWORD=TestPass123!
+          CALDERA_ADMIN_PASSWORD=TestPass456!
+          EOF
+
+      - name: Start services
+        run: |
+          docker compose up -d --quiet-pull
+
+      - name: Wait for health checks
+        run: |
+          timeout 600 bash -c '
+            while true; do
+              splunk_healthy=$(docker inspect --format="{{.State.Health.Status}}" splunk-threatlab 2>/dev/null || echo "starting")
+              caldera_healthy=$(docker inspect --format="{{.State.Health.Status}}" caldera-threatlab 2>/dev/null || echo "starting")
+              echo "Splunk: $splunk_healthy | Caldera: $caldera_healthy"
+              if [ "$splunk_healthy" = "healthy" ] && [ "$caldera_healthy" = "healthy" ]; then
+                echo "✓ Both services healthy"
+                exit 0
+              fi
+              sleep 10
+            done
+          '
+
+      - name: Test Splunk API
+        run: |
+          curl -k -u "admin:TestPass123!" https://localhost:8089/services/server/info | grep -q "serverName" && echo "✓ Splunk API responding"
+
+      - name: Test Caldera API
+        run: |
+          curl -s http://localhost:8888/api/v2/version | jq -e '.version' && echo "✓ Caldera API responding"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v
+
+  dependabot:
+    name: Check Dependabot Alerts
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'had-nu'
+    steps:
+      - name: Check for Dependabot alerts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const alerts = await github.rest.dependabot.getRepoDependabotAlerts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            if (alerts.data.length > 0) {
+              console.log(`⚠️ ${alerts.data.length} open Dependabot alerts:`);
+              alerts.data.forEach(a => console.log(`  - ${a.dependency.package.name}: ${a.security_advisory.severity} - ${a.security_advisory.summary}`));
+              core.setFailed('Dependabot alerts found');
+            } else {
+              console.log('✓ No open Dependabot alerts');
+            }

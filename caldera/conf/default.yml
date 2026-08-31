@@ -1,0 +1,86 @@
+# Caldera Default Configuration
+# This file is mounted to /usr/src/app/conf/default.yml in the container
+# For production, create conf/local.yml with your overrides
+
+app:
+  host: "0.0.0.0"
+  port: 8888
+  name: "Threat Hunt Lab Caldera"
+  debug: false
+
+# SSL/TLS Configuration (optional - requires cert files)
+# ssl:
+#   key: "conf/caldera.key"
+#   cert: "conf/caldera.crt"
+
+# Database
+database:
+  type: "sqlite"
+  path: "conf/caldera.db"
+
+# Authentication
+auth:
+  provider: "local"
+  users:
+    admin:
+      password: "${CALDERA_ADMIN_PASSWORD}"
+      roles: ["admin"]
+
+# API Keys (auto-generated on first run if not present)
+api_keys:
+  red: "red-api-key-change-me"
+  blue: "blue-api-key-change-me"
+
+# Plugins (enabled by default)
+plugins:
+  - training
+  - atomic
+  - stockpile
+  - sandcat
+  - manx
+  - response
+  - compass
+  - fieldmanual
+  - builder
+
+# Contact configurations (C2 channels)
+contacts:
+  - name: "http"
+    type: "http"
+    port: 8888
+    api_key: "red"
+  - name: "websocket"
+    type: "websocket"
+    port: 7010
+    api_key: "red"
+  - name: "tcp"
+    type: "tcp"
+    port: 7011
+    api_key: "red"
+  - name: "udp"
+    type: "udp"
+    port: 7012
+    api_key: "red"
+
+# Sandcat agent settings
+sandcat:
+  server: "http://caldera-threatlab:8888"
+  sleep_min: 5
+  sleep_max: 10
+  watchdog: 30
+
+# Manx agent settings
+manx:
+  server: "http://caldera-threatlab:8888"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/caldera.log"
+  max_size: "10MB"
+  max_files: 5
+
+# Agent build settings
+agent:
+  go_path: "/usr/local/go"
+  output_dir: "payloads"

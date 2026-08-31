@@ -1,31 +1,112 @@
 services:
   splunk:
-    image: splunk/splunk:9.1.2
+    image: splunk/splunk:10.4.2
     container_name: splunk-threatlab
+    hostname: splunk-threatlab
     environment:
-      - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_PASSWORD=${PASSWD_SPLUNK}
+      - SPLUNK_START_ARGS=--accept-license --answer-yes --no-prompt
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD}
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-}
     ports:
       - "8000:8000"
+      - "8088:8088"
+      - "8089:8089"
     volumes:
-      - ./volumes/splunk-data:/opt/splunk/var
+      - splunk-data:/opt/splunk/var
+      - splunk-etc:/opt/splunk/etc
+      - ./splunk/etc/apps:/opt/splunk/etc/apps:ro
+      - ./splunk/etc/system/local:/opt/splunk/etc/system/local:ro
+    networks:
+      - threatlab-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "/opt/splunk/bin/splunk", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   caldera:
-    image: caldera:latest
+    image: ghcr.io/mitre/caldera:latest
     container_name: caldera-threatlab
+    hostname: caldera-threatlab
+    environment:
+      - CALDERA_ADMIN_PASSWORD=${CALDERA_ADMIN_PASSWORD}
     ports:
       - "8888:8888"
-      - "8443:8443"
-      - "7010:7010"
-      - "7011:7011/udp"
-      - "7012:7012"
-      - "8853:8853"
-      - "8022:8022"
-      - "2222:2222"
     volumes:
-      - ./volumes/caldera-logs:/usr/src/app/logs
-    command: --insecure --log DEBUG
+      - caldera-logs:/usr/src/app/logs
+      - caldera-conf:/usr/src/app/conf
+      - caldera-plugins:/usr/src/app/plugins
+      - ./caldera/conf/default.yml:/usr/src/app/conf/default.yml:ro
+      - ./caldera/conf/local.yml:/usr/src/app/conf/local.yml:ro
+    networks:
+      - threatlab-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api/v2/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: Reverse proxy for TLS termination (enable by uncommenting)
+  # traefik:
+  #   image: traefik:v3.0
+  #   container_name: traefik-threatlab
+  #   command:
+  #     - --api.insecure=true
+  #     - --providers.docker=true
+  #     - --providers.docker.exposedbydefault=false
+  #     - --entrypoints.web.address=:80
+  #     - --entrypoints.websecure.address=:443
+  #     - --certificatesresolvers.le.acme.email=your@email.com
+  #     - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+  #     - --certificatesresolvers.le.acme.tlschallenge=true
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "8080:8080"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./letsencrypt:/letsencrypt
+  #   networks:
+  #     - threatlab-net
+  #   restart: unless-stopped
+
+networks:
+  threatlab-net:
+    driver: bridge
+    name: threatlab-network
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
 
 volumes:
   splunk-data:
+    name: threatlab-splunk-data
+  splunk-etc:
+    name: threatlab-splunk-etc
   caldera-logs:
+    name: threatlab-caldera-logs
+  caldera-conf:
+    name: threatlab-caldera-conf
+  caldera-plugins:
+    name: threatlab-caldera-plugins
