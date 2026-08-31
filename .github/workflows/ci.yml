@@ -24,18 +24,18 @@ jobs:
       - name: Validate docker-compose.yml syntax
         run: |
           docker compose config --quiet
-          echo "✓ docker-compose.yml is valid"
+          echo "[OK] docker-compose.yml is valid"
 
       - name: Check required env vars in .env.example
         run: |
           required_vars=("SPLUNK_PASSWORD" "CALDERA_ADMIN_PASSWORD")
           for var in "${required_vars[@]}"; do
             if ! grep -q "^${var}=" .env.example; then
-              echo "✗ Missing required variable: $var"
+              echo "[ERRO] Missing required variable: $var"
               exit 1
             fi
           done
-          echo "✓ All required variables present in .env.example"
+          echo "[OK] All required variables present in .env.example"
 
   security-scan:
     name: Security Scan (Trivy)
@@ -91,7 +91,7 @@ jobs:
       - name: Compare Splunk versions
         if: steps.splunk.outputs.version != steps.splunk-latest.outputs.latest
         run: |
-          echo "⚠️ Splunk version outdated!"
+          echo "[AVISO] Splunk version outdated!"
           echo "Current: ${{ steps.splunk.outputs.version }}"
           echo "Latest:  ${{ steps.splunk-latest.outputs.latest }}"
           echo "Consider updating docker-compose.yml"
@@ -114,7 +114,7 @@ jobs:
       - name: Compare Caldera versions
         if: steps.caldera.outputs.version != steps.caldera-latest.outputs.latest
         run: |
-          echo "⚠️ Caldera version may be outdated!"
+          echo "[AVISO] Caldera version may be outdated!"
           echo "Current: ${{ steps.caldera.outputs.version }}"
           echo "Latest:  ${{ steps.caldera-latest.outputs.latest }}"
           echo "Consider updating docker-compose.yml"
@@ -151,7 +151,7 @@ jobs:
               caldera_healthy=$(docker inspect --format="{{.State.Health.Status}}" caldera-threatlab 2>/dev/null || echo "starting")
               echo "Splunk: $splunk_healthy | Caldera: $caldera_healthy"
               if [ "$splunk_healthy" = "healthy" ] && [ "$caldera_healthy" = "healthy" ]; then
-                echo "✓ Both services healthy"
+                echo "[OK] Both services healthy"
                 exit 0
               fi
               sleep 10
@@ -160,11 +160,11 @@ jobs:
 
       - name: Test Splunk API
         run: |
-          curl -k -u "admin:TestPass123!" https://localhost:8089/services/server/info | grep -q "serverName" && echo "✓ Splunk API responding"
+          curl -k -u "admin:TestPass123!" https://localhost:8089/services/server/info | grep -q "serverName" && echo "[OK] Splunk API responding"
 
       - name: Test Caldera API
         run: |
-          curl -s http://localhost:8888/api/v2/version | jq -e '.version' && echo "✓ Caldera API responding"
+          curl -s http://localhost:8888/api/v2/version | jq -e '.version' && echo "[OK] Caldera API responding"
 
       - name: Cleanup
         if: always()
@@ -189,9 +189,9 @@ jobs:
               state: 'open'
             });
             if (alerts.data.length > 0) {
-              console.log(`⚠️ ${alerts.data.length} open Dependabot alerts:`);
+              console.log(`[AVISO] ${alerts.data.length} open Dependabot alerts:`);
               alerts.data.forEach(a => console.log(`  - ${a.dependency.package.name}: ${a.security_advisory.severity} - ${a.security_advisory.summary}`));
               core.setFailed('Dependabot alerts found');
             } else {
-              console.log('✓ No open Dependabot alerts');
+              console.log('[OK] No open Dependabot alerts');
             }

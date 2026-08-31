@@ -14,7 +14,7 @@ Este é um ambiente Docker pré-configurado para simular ataques (Caldera) e mon
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
 threat-hunt-lab/
@@ -34,7 +34,7 @@ threat-hunt-lab/
 
 ---
 
-## 🚀 Quick Start (Início Rápido)
+## Quick Start (Início Rápido)
 
 ### Pré-Requisitos
 
@@ -43,7 +43,7 @@ threat-hunt-lab/
 - **CPU**: 4+ cores
 - **Portas livres**: 8000, 8088, 8089 (Splunk) • 8888 (Caldera)
 
-> 💡 **Ubuntu/Debian**: `sudo apt update && sudo apt install docker.io docker-compose-plugin`
+> **Ubuntu/Debian**: `sudo apt update && sudo apt install docker.io docker-compose-plugin`
 
 ---
 
@@ -80,7 +80,7 @@ docker compose logs -f
 | **Splunk Mgmt** | https://localhost:8089 | `admin` / `$SPLUNK_PASSWORD` |
 | **Caldera** | http://localhost:8888 | `admin` / `$CALDERA_ADMIN_PASSWORD` |
 
-> ⏳ **Primeira inicialização**: Splunk leva ~2-3 min para aceitar licença e indexar. Caldera ~30-60s.
+> **Primeira inicialização**: Splunk leva ~2-3 min para aceitar licença e indexar. Caldera ~30-60s.
 
 ---
 
@@ -109,7 +109,7 @@ docker compose down -v
 
 ---
 
-## ⚙️ Configuração Avançada
+## Configuração Avançada
 
 ### Variáveis de Ambiente (`.env`)
 
@@ -136,7 +136,7 @@ SPLUNK_HEC_TOKEN=meu-token-hec          # Para ingestão via HTTP Event Collecto
 | 7011 | Caldera TCP | TCP | Raw TCP C2 (opcional) |
 | 7012 | Caldera UDP | UDP | UDP C2 (opcional) |
 
-> 🔒 **Segurança**: Por padrão, apenas 8000, 8088, 8089 (Splunk) e 8888 (Caldera) são expostos no host. Portas C2 (7010-7012) ficam apenas na rede interna `threatlab-network`. Para expor, edite `docker-compose.yml`.
+> **Segurança**: Por padrão, apenas 8000, 8088, 8089 (Splunk) e 8888 (Caldera) são expostos no host. Portas C2 (7010-7012) ficam apenas na rede interna `threatlab-network`. Para expor, edite `docker-compose.yml`.
 
 ### Rede Isolada
 
@@ -144,7 +144,7 @@ Todos os containers rodam na rede `threatlab-network` (subnet `172.28.0.0/16`), 
 
 ---
 
-## 🔧 Operações Comuns
+## Operações Comuns
 
 ### Logs
 
@@ -202,7 +202,7 @@ docker image prune -f
 
 ---
 
-## 🛡️ Hardening de Segurança (Produção)
+## Hardening de Segurança (Produção)
 
 ### 1. TLS/SSL com Traefik (Recomendado)
 
@@ -251,13 +251,13 @@ Regere API keys no primeiro login:
 
 ---
 
-## 📚 Primeiros Passos no Laboratório
+## Primeiros Passos no Laboratório
 
 ### Splunk: Ingestão de Logs do Caldera
 
 1. No Splunk Web: **Settings > Data Inputs > HTTP Event Collector > New Token**
    - Name: `caldera`
-   - Enable SSL: ✅ (se usar Traefik)
+   - Enable SSL: Sim (se usar Traefik)
    - Index: `main` (ou crie `threathunt`)
 2. Copie o **Token** gerado
 3. No Caldera: **Settings > Reporting > Splunk** > configure host/token
@@ -273,7 +273,7 @@ Regere API keys no primeiro login:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 | Problema | Solução |
 |----------|---------|
@@ -286,7 +286,7 @@ Regere API keys no primeiro login:
 
 ---
 
-## 📦 Versões Utilizadas
+## Versões Utilizadas
 
 | Componente | Versão | Fonte |
 |------------|--------|-------|
@@ -294,11 +294,11 @@ Regere API keys no primeiro login:
 | MITRE Caldera | 5.3.0+ (latest) | `ghcr.io/mitre/caldera:latest` (GHCR) |
 | Traefik (opcional) | v3.0 | `traefik:v3.0` (Docker Hub) |
 
-> 📌 **Nota**: Splunk 10.x requer `SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com`. Para LTS, use `splunk/splunk:9.4.3`.
+> **Nota**: Splunk 10.x requer `SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com`. Para LTS, use `splunk/splunk:9.4.3`.
 
 ---
 
-## 🤝 Contribuindo
+## Contribuindo
 
 1. Fork o repositório
 2. Crie branch: `git checkout -b feature/minha-feature`
@@ -308,13 +308,13 @@ Regere API keys no primeiro login:
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto está licenciado sob a **Apache License 2.0**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-## 🔗 Referências
+## Referências
 
 - [Splunk Docker Docs](https://github.com/splunk/docker-splunk)
 - [Caldera Documentation](https://caldera.readthedocs.io/)

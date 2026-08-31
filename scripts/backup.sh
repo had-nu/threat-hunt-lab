@@ -16,10 +16,10 @@ mkdir -p "$BACKUP_DIR"
 
 # Check if containers are running
 if ! docker compose -f "$PROJECT_ROOT/docker-compose.yml" ps --services --filter "status=running" | grep -q .; then
-    echo "⚠️  No containers running. Backing up volumes directly..."
+    echo "[AVISO] No containers running. Backing up volumes directly..."
     VOLUMES_RUNNING=false
 else
-    echo "✓ Containers running. Will backup via containers..."
+    echo "[OK] Containers running. Will backup via containers..."
     VOLUMES_RUNNING=true
 fi
 
@@ -53,16 +53,16 @@ for vol in "${volumes[@]}"; do
     if docker volume inspect "$vol_name" >/dev/null 2>&1; then
         backup_volume "$vol_name" "$vol_file"
     else
-        echo "  ⚠️  Volume $vol_name not found, skipping"
+        echo "  [AVISO] Volume $vol_name not found, skipping"
     fi
 done
 
 echo ""
 echo "--- Backing up configuration files ---"
-cp "$PROJECT_ROOT/.env" "$BACKUP_DIR/.env.bak" 2>/dev/null && echo "  ✓ .env" || echo "  ⚠️  .env not found"
-cp "$PROJECT_ROOT/docker-compose.yml" "$BACKUP_DIR/docker-compose.yml.bak" && echo "  ✓ docker-compose.yml"
-cp -r "$PROJECT_ROOT/caldera/conf" "$BACKUP_DIR/caldera-conf-files" 2>/dev/null && echo "  ✓ caldera/conf" || echo "  ⚠️  caldera/conf not found"
-cp -r "$PROJECT_ROOT/splunk/etc" "$BACKUP_DIR/splunk-etc-files" 2>/dev/null && echo "  ✓ splunk/etc" || echo "  ⚠️  splunk/etc not found"
+cp "$PROJECT_ROOT/.env" "$BACKUP_DIR/.env.bak" 2>/dev/null && echo "  [OK] .env" || echo "  [AVISO] .env not found"
+cp "$PROJECT_ROOT/docker-compose.yml" "$BACKUP_DIR/docker-compose.yml.bak" && echo "  [OK] docker-compose.yml"
+cp -r "$PROJECT_ROOT/caldera/conf" "$BACKUP_DIR/caldera-conf-files" 2>/dev/null && echo "  [OK] caldera/conf" || echo "  [AVISO] caldera/conf not found"
+cp -r "$PROJECT_ROOT/splunk/etc" "$BACKUP_DIR/splunk-etc-files" 2>/dev/null && echo "  [OK] splunk/etc" || echo "  [AVISO] splunk/etc not found"
 
 echo ""
 echo "--- Creating manifest ---"

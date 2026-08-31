@@ -21,7 +21,7 @@ echo "Backup dir: $BACKUP_DIR"
 echo ""
 
 # Confirm
-read -p "⚠️  This will OVERWRITE current volumes and configs. Continue? (yes/no): " confirm
+read -p "[AVISO] This will OVERWRITE current volumes and configs. Continue? (yes/no): " confirm
 if [ "$confirm" != "yes" ]; then
     echo "Aborted."
     exit 1
@@ -53,7 +53,7 @@ restore_volume() {
             alpine:latest \
             tar xzf "/backup/$(basename "$backup_file")" -C /data
     else
-        echo "  ⚠️  Backup file not found: $backup_file"
+        echo "  [AVISO] Backup file not found: $backup_file"
     fi
 }
 
@@ -76,19 +76,19 @@ echo ""
 echo "--- Restoring configuration files ---"
 if [ -f "$BACKUP_DIR/.env.bak" ]; then
     cp "$BACKUP_DIR/.env.bak" "$PROJECT_ROOT/.env"
-    echo "  ✓ .env restored"
+    echo "  [OK] .env restored"
 fi
 
 if [ -d "$BACKUP_DIR/caldera-conf-files" ]; then
     rm -rf "$PROJECT_ROOT/caldera/conf"
     cp -r "$BACKUP_DIR/caldera-conf-files" "$PROJECT_ROOT/caldera/conf"
-    echo "  ✓ caldera/conf restored"
+    echo "  [OK] caldera/conf restored"
 fi
 
 if [ -d "$BACKUP_DIR/splunk-etc-files" ]; then
     rm -rf "$PROJECT_ROOT/splunk/etc"
     cp -r "$BACKUP_DIR/splunk-etc-files" "$PROJECT_ROOT/splunk/etc"
-    echo "  ✓ splunk/etc restored"
+    echo "  [OK] splunk/etc restored"
 fi
 
 # Start containers
