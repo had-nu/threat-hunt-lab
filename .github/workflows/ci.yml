@@ -135,6 +135,10 @@ jobs:
           CALDERA_ADMIN_PASSWORD=TestPass456!
           EOF
 
+      - name: Create Caldera local.yml (required for mount)
+        run: |
+          cp caldera/conf/local.yml.example caldera/conf/local.yml
+
       - name: Start services
         run: |
           docker compose up -d --quiet-pull
@@ -171,12 +175,15 @@ jobs:
     name: Check Dependabot Alerts
     runs-on: ubuntu-latest
     if: github.repository_owner == 'had-nu'
+    permissions:
+      security-events: read
+      contents: read
     steps:
       - name: Check for Dependabot alerts
         uses: actions/github-script@v7
         with:
           script: |
-            const alerts = await github.rest.dependabot.getRepoDependabotAlerts({
+            const alerts = await github.rest.dependabot.getAlertsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open'
