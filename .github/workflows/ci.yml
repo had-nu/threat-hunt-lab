@@ -183,17 +183,25 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const response = await github.request('GET /repos/{owner}/{repo}/dependabot/alerts', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 100
-            });
-            const alerts = response.data;
-            if (alerts.length > 0) {
-              console.log(`[AVISO] ${alerts.length} open Dependabot alerts:`);
-              alerts.forEach(a => console.log(`  - ${a.dependency.package.name}: ${a.security_advisory.severity} - ${a.security_advisory.summary}`));
-              core.setFailed('Dependabot alerts found');
-            } else {
-              console.log('[OK] No open Dependabot alerts');
+            try {
+              const response = await github.request('GET /repos/{owner}/{repo}/dependabot/alerts', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100
+              });
+              const alerts = response.data;
+              if (alerts.length > 0) {
+                console.log(`[AVISO] ${alerts.length} open Dependabot alerts:`);
+                alerts.forEach(a => console.log(`  - ${a.dependency.package.name}: ${a.security_advisory.severity} - ${a.security_advisory.summary}`));
+                core.setFailed('Dependabot alerts found');
+              } else {
+                console.log('[OK] No open Dependabot alerts');
+              }
+            } catch (error) {
+              if (error.status === 403 || error.status === 404) {
+                console.log('[INFO] Dependabot alerts not enabled for this repository. Skipping check.');
+              } else {
+                throw error;
+              }
             }
