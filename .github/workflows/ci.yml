@@ -183,14 +183,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const alerts = await github.rest.dependabot.getAlertsForRepo({
+            const response = await github.request('GET /repos/{owner}/{repo}/dependabot/alerts', {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'open'
+              state: 'open',
+              per_page: 100
             });
-            if (alerts.data.length > 0) {
-              console.log(`[AVISO] ${alerts.data.length} open Dependabot alerts:`);
-              alerts.data.forEach(a => console.log(`  - ${a.dependency.package.name}: ${a.security_advisory.severity} - ${a.security_advisory.summary}`));
+            const alerts = response.data;
+            if (alerts.length > 0) {
+              console.log(`[AVISO] ${alerts.length} open Dependabot alerts:`);
+              alerts.forEach(a => console.log(`  - ${a.dependency.package.name}: ${a.security_advisory.severity} - ${a.security_advisory.summary}`));
               core.setFailed('Dependabot alerts found');
             } else {
               console.log('[OK] No open Dependabot alerts');
