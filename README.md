@@ -43,10 +43,29 @@ threat-hunt-lab/
 - **CPU**: 4+ cores
 - **Portas livres**: 8000, 8088, 8089 (Splunk) • 8888 (Caldera)
 
-> **Ubuntu/Debian**: `sudo apt update && sudo apt install docker.io docker-compose-plugin`
-> **Arch Linux**: `sudo pacman -Syu docker docker-compose`
-> **Fedora (repositório nativo)**: `sudo dnf install docker docker-compose-plugin`
-> **Fedora (Docker CE oficial)**: `sudo dnf -y install dnf-plugins-core && sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo && sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin`
+**Instalação do Docker por distro:**
+
+- **Ubuntu/Debian:**
+  ```bash
+  sudo apt update && sudo apt install docker.io docker-compose-plugin
+  ```
+
+- **Arch Linux:**
+  ```bash
+  sudo pacman -Syu docker docker-compose
+  ```
+
+- **Fedora (repositório nativo):**
+  ```bash
+  sudo dnf install docker docker-compose-plugin
+  ```
+
+- **Fedora (Docker CE oficial — versão mais recente):**
+  ```bash
+  sudo dnf -y install dnf-plugins-core
+  sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+  sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  ```
 
 Após instalar em qualquer distro, habilite o serviço, adicione seu usuário ao grupo `docker` e verifique:
 
